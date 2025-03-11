@@ -1,0 +1,151 @@
+basePath: /
+definitions:
+  authentication.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  authentication.RegisterRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  authentication.User:
+    properties:
+      created_at:
+        type: string
+      deleted_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Đây là tài liệu API cho dự án Go + Echo + GORM
+  title: My Project API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Email và Password
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/authentication.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Đăng nhập user
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thông tin user
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/authentication.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Đăng ký user
+      tags:
+      - auth
+  /users:
+    get:
+      description: API này trả về danh sách tất cả người dùng
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/authentication.User'
+            type: array
+      summary: Lấy danh sách người dùng
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      description: API này xóa một user từ database
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Xóa user theo ID
+      tags:
+      - users
+    get:
+      description: API này trả về thông tin một user dựa trên ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/authentication.User'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Lấy user theo ID
+      tags:
+      - users
+swagger: "2.0"
