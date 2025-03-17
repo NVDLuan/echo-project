@@ -24,6 +24,11 @@ type Config struct {
 	RedisHost     string
 	RedisPort     string
 	RedisPassword string
+
+	RedisSentinelPassword string
+	RedisSentinel1        string
+	RedisSentinel2        string
+	RedisSentinel3        string
 }
 
 var (
@@ -56,6 +61,11 @@ func LoadConfig() {
 			RedisHost:     os.Getenv("REDIS_HOST"),
 			RedisPort:     os.Getenv("REDIS_PORT"),
 			RedisPassword: os.Getenv("REDIS_PASSWORD"),
+
+			RedisSentinelPassword: os.Getenv("REDIS_SENTINEL_PASSWORD"),
+			RedisSentinel1:        os.Getenv("REDIS_SENTINEL_1"),
+			RedisSentinel2:        os.Getenv("REDIS_SENTINEL_2"),
+			RedisSentinel3:        os.Getenv("REDIS_SENTINEL_3"),
 		}
 		log.Println("✅ Config loaded successfully!")
 	})

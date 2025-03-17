@@ -14,15 +14,16 @@ func InitLogger() {
 	log.SetFormatter(&logrus.TextFormatter{
 		DisableColors:   true, // Tắt màu để log rõ ràng hơn
 		FullTimestamp:   true, // Hiển thị thời gian đầy đủ
-		TimestampFormat: "2006-01-02 15:04:05",
+		TimestampFormat: "2006-01-02 15:04:05.000000",
 	})
 	log.SetLevel(logrus.DebugLevel)
 }
 
 func SetupEchoLogger() echo.MiddlewareFunc {
 	return middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: `${time_rfc3339}  |  ${method}  |  ${uri}  |  ${status}  |  ${latency_human}` + "\n",
-		Output: os.Stdout,
+		Format:           "${time_custom}  |  ${method}  |  ${uri}  |  ${status}  |  ${latency_human}\n",
+		CustomTimeFormat: "2006-01-02 15:04:05.000", // Hiển thị đến millisecond
+		Output:           os.Stdout,
 	})
 }
 

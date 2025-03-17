@@ -1,13 +1,29 @@
 package auth
 
 import (
+	"encoding/json"
+	"github.com/redis/go-redis/v9"
 	"my-project/configs/app"
+	"my-project/configs/cache"
 	"my-project/pkg/logger"
 	"net/http"
 	"strconv"
+	"sync"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
+
+var luaScript = redis.NewScript(`
+    local key = KEYS[1]
+    local data = redis.call("GET", key)
+    if data then
+        return data
+    else
+        return nil
+    end
+`)
+var cacheMutex = sync.Mutex{}
 
 // GetUsersHandler lấy danh sách user
 // @Summary Lấy danh sách người dùng
@@ -17,10 +33,50 @@ import (
 // @Success 200 {array} User
 // @Router /users [get]
 func GetUsersHandler(c echo.Context) error {
-	users, err := GetUsers()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+	// Kiểm tra dữ liệu trong Redis bằng Lua
+
+	redisClient := cache.GetRedisClient()
+	log := logger.GetLogger()
+	result, err := luaScript.Run(cache.Ctx, redisClient, []string{"hello"}).Result()
+	if err == redis.Nil || result == nil {
+		cacheMutex.Lock()
+		defer cacheMutex.Unlock()
+
+		result, err = luaScript.Run(cache.Ctx, redisClient, []string{"hello"}).Result()
+		if err == redis.Nil || result == nil {
+			log.Warn("🔍 Không tìm thấy dữ liệu trong Redis, lấy từ database...")
+			users, err := GetUsers()
+			if err != nil {
+				log.Error("❌ Lỗi khi lấy dữ liệu từ database:", err)
+				return c.JSON(http.StatusInternalServerError, "Database error")
+			}
+
+			usersJSONBytes, err := json.Marshal(users)
+			if err != nil {
+				log.Error("❌ Lỗi khi encode JSON:", err)
+				return c.JSON(http.StatusInternalServerError, "JSON encoding error")
+			}
+
+			err = redisClient.Set(cache.Ctx, "hello", string(usersJSONBytes), 10*time.Minute).Err()
+			if err != nil {
+				log.Error("❌ Lỗi khi lưu dữ liệu vào Redis:", err)
+				return c.JSON(http.StatusInternalServerError, "Redis store error")
+			}
+			log.Info("✅ Lưu dữ liệu mới vào Redis thành công!")
+			return c.JSON(http.StatusOK, users)
+		}
+	} else if err != nil {
+		log.Error("❌ Lỗi khi chạy Lua script:", err)
+		return c.JSON(http.StatusInternalServerError, "Redis Lua error")
 	}
+
+	// Nếu Redis có dữ liệu
+	var users []User
+	if err := json.Unmarshal([]byte(result.(string)), &users); err != nil {
+		log.Error("❌ Lỗi khi parse JSON từ Redis:", err)
+		return c.JSON(http.StatusInternalServerError, "JSON parsing error")
+	}
+	log.Info("✅ Lấy dữ liệu từ Redis thành công!")
 	return c.JSON(http.StatusOK, users)
 }
 
