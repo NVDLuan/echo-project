@@ -40,7 +40,7 @@ func LoadConfig() {
 	once.Do(func() {
 		err := godotenv.Load()
 		if err != nil {
-			log.Fatal("❌ Lỗi khi tải file .env")
+			log.Fatal("❌ Lỗi khi tải file .env", err)
 		}
 		allowHost, exists := os.LookupEnv("ALLOW_HOST")
 		if !exists {

@@ -46,16 +46,3 @@ func InitRedis() {
 func GetRedisClient() *redis.Client {
 	return rdb
 }
-
-var luaScript = redis.NewScript(`
-    local key = KEYS[1]
-    local value = ARGV[1]
-    local ttl = ARGV[2]
-    local data = redis.call("GET", key)
-    if data then
-        return data
-    else
-        redis.call("SETEX", key, ttl, value)
-        return value
-    end
-`)

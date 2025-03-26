@@ -5,11 +5,11 @@ import (
 )
 
 func SetupRoutes(e *echo.Echo) {
-	e.POST("/auth/register", RegisterHandler)
-	e.POST("/auth/login", LoginHandler)
+	//e.POST("/auth/register", RegisterHandler)
+	//e.POST("/auth/login", LoginHandler)
 
 	protected := e.Group("/users")
 	protected.GET("", GetUsersHandler)
-	protected.GET("/:id", GetUserHandler)
-	protected.DELETE("/:id", DeleteUserHandler)
+	//protected.GET("/:id", GetUserHandler)
+	//protected.DELETE("/:id", DeleteUserHandler)
 }

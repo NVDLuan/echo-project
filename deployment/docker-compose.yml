@@ -1,0 +1,56 @@
+version: '3'
+services:
+  echo1:
+    image: echo-project:latest # Thay bằng image thực tế của bạn
+    ports:
+      - "8081:8080" # Ánh xạ cổng để kiểm tra riêng nếu cần
+    container_name: echo1
+
+    environment:
+      - DB_HOST=172.17.0.1
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=test
+      - DB_PORT=5433
+      - DB_SSLMODE=disable
+      - JWT_SECRET=mysecretkey
+      - JWT_AUTH_COOKIE=access_token
+      - JWT_SET_COOKIE=true
+
+      - REDIS_HOST=172.17.0.1
+      - REDIS_PORT=6379
+      - REDIS_SENTINEL_1=172.17.0.1:26379
+      - REDIS_SENTINEL_2=172.17.0.1:26380
+      - REDIS_SENTINEL_3=172.17.0.1:26381
+
+  echo2:
+    image: echo-project:latest # Thay bằng image thực tế của bạn
+    ports:
+      - "8082:8080" # Ánh xạ cổng để kiểm tra riêng nếu cần
+    container_name: echo2
+    environment:
+      - DB_HOST=172.17.0.1
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=test
+      - DB_PORT=5433
+      - DB_SSLMODE=disable
+      - JWT_SECRET=mysecretkey
+      - JWT_AUTH_COOKIE=access_token
+      - JWT_SET_COOKIE=true
+
+      - REDIS_HOST=172.17.0.1
+      - REDIS_PORT=6379
+      - REDIS_SENTINEL_1=172.17.0.1:26379
+      - REDIS_SENTINEL_2=172.17.0.1:26380
+      - REDIS_SENTINEL_3=172.17.0.1:26381
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8001:80" # NGINX lắng nghe trên cổng 80 của host
+    depends_on:
+      - echo1
+      - echo2

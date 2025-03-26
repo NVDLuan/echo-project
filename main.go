@@ -12,12 +12,6 @@ import (
 	"my-project/pkg/logger"
 )
 
-// @title My Project API
-// @version 1.0
-// @description Đây là tài liệu API cho dự án Go + Echo + GORM
-// @host localhost:8080
-// @BasePath /
-
 func main() {
 
 	logger.InitLogger()
